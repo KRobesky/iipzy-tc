@@ -65,7 +65,6 @@ async function main() {
   if (logLevel) setLogLevel(logLevel);
   else await configFile.set("logLevel", "info");
 
-  /*
   const serverAddress = configFile.get("serverAddress");
   if (serverAddress) {
     log("serverAddress = " + serverAddress, "main", "info");
@@ -77,7 +76,7 @@ async function main() {
       http.clearBaseURL();
       await configFile.set("serverAddress", "");
     }
-  */
+  }
 
   // NB: Won't leave here until successfully contacting server.
   const { gatewayIPAddress, localIPAddress, publicIPAddress } = await prerequisite(
