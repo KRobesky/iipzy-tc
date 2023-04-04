@@ -1,0 +1,22 @@
+[Unit]
+Description=Node.js iipzy-tc 
+
+[Service]
+ExecStart=/usr/bin/node /home/pi/iipzy-service-b/iipzy-tc/src/index.js
+# Required on some systems
+#WorkingDirectory=/home/pi/iipzy-service-b/iipzy-tc
+Restart=always
+# Restart service after 10 seconds if node service crashes
+RestartSec=10
+# Output to syslog
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=iipzy-tc
+#User=<alternate user>
+User=pi
+#Group=<alternate group>
+Group=pi
+Environment=NODE_ENV=production PORT=8002
+
+[Install]
+WantedBy=multi-user.target
