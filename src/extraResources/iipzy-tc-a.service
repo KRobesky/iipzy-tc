@@ -2,7 +2,7 @@
 Description=Node.js iipzy-tc 
 
 [Service]
-ExecStart=/usr/bin/node /home/pi/iipzy-service-a/iipzy-tc/src/index.js
+ExecStart=/usr/bin/node /home/pi/iipzy-tc-a/iipzy-tc/src/index.js
 # Required on some systems
 #WorkingDirectory=/home/pi/iipzy-service-a/iipzy-tc
 Restart=always
