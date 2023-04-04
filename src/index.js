@@ -28,7 +28,7 @@ const { processErrorHandler } = require("iipzy-shared/src/utils/utils");
 //const scheduler = require("./core/main/scheduler");
 //const throughputTest = require("./core/main/throughputTest");
 
-const TrafficControl = require("./core/main/trafficControl");
+const TrafficControl = require("./services/trafficControl");
 
 //const { changeTimezoneIfNecessary } = require("./utils/timezone");
 
