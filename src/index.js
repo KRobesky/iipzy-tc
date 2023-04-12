@@ -79,21 +79,25 @@ async function main() {
   }
 
   // NB: Won't leave here until successfully contacting server.
-  const { gatewayIPAddress, localIPAddress, publicIPAddress } = await prerequisite(
+  const { gatewayIPAddress, localIPAddress, publicIPAddress, clientToken, authToken } = await prerequisite(
     http,
     configFile
   );
 
-  /*
   const clientName = configFile.get("clientName");
   log("..clientName=" + clientName, "main", "info");
 
+  /*
   const clientToken = configFile.get("clientToken");
   log("..clientToken=" + clientToken, "main", "info");
   if (clientToken) {
     http.setClientTokenHeader(clientToken);
   }
   */
+
+  http.setClientTokenHeader(clientToken);
+  http.setAuthTokenHeader(authToken);
+
 
   //ipcRecv = new IpcRecv();
   //ipcSend = new IpcSend();
@@ -211,7 +215,7 @@ async function main() {
   }, 10 * 1000);
   */
 
-  trafficControl = new TrafficControl("testing", "br-lan", "157.245.180.54");
+  trafficControl = new TrafficControl("testing", context);
   // start in 10 seconds
   setTimeout(async () => {
     trafficControl.run();

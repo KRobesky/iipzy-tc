@@ -52,12 +52,17 @@ async function prerequisite(http, configFile) {
     }
   }
 
-  clientToken = configFile.get("clientToken");
-  log("prerequisite: clientToken = " + clientToken, "preq", "info");
-  if (clientToken && clientToken !== serialNumber) {
-    clientToken = null;
-  }
+  // wait forever to get a clientToken
+  let clientToken = null;
+  while (!clientToken) {
+    clientToken = await configFile.get("clientToken");
+    log("prerequisite: clientToken = " + clientToken, "preq", "info");
+    if (clientToken && clientToken === serialNumber) 
+      break;
+    await sleep(1000);
+  } 
 
+  /*
   if (!clientToken) {
     // clear some settings.
     const configPublicIPAddress = configFile.get("publicIPAddress");
@@ -71,6 +76,17 @@ async function prerequisite(http, configFile) {
       await configFile.set("publicIPAddress", publicIPAddress);
     }
   }
+  */
+
+  // wait forever to get an authToken
+  let authToken = null;
+  while (!authToken) {
+    authToken = await configFile.get("authToken");
+    log("prerequisite: authToken = " + authToken, "preq", "info");
+    if (authToken) 
+      break;
+    await sleep(1000);
+  } 
 
   await changeTimezoneIfNecessary(configFile);
   /*
@@ -102,7 +118,7 @@ async function prerequisite(http, configFile) {
   */
 
 
-  const ret = { gatewayIPAddress, localIPAddress, publicIPAddress, serialNumber };
+  const ret = { gatewayIPAddress, localIPAddress, publicIPAddress, serialNumber, clientToken, authToken };
 
   log("<<<prerequisite: " + JSON.stringify(ret), "preq", "info");
 
