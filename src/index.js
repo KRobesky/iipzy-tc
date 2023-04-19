@@ -61,9 +61,6 @@ async function main() {
   configFile = new ConfigFile(userDataPath, Defs.configFilename);
   await configFile.init();
   configFile.watch(configWatchCallback);
-  logLevel = configFile.get("logLevel");
-  if (logLevel) setLogLevel(logLevel);
-  else await configFile.set("logLevel", "info");
 
   const serverAddress = configFile.get("serverAddress");
   if (serverAddress) {
@@ -132,22 +129,6 @@ async function main() {
   await auth.login();
   */
 
-  function configWatchCallback() {
-    log("configWatchCallback", "main", "info");
-    const logLevel_ = configFile.get("logLevel");
-    if (logLevel_ !== logLevel) {
-      log(
-        "configWatchCallback: logLevel change: old = " + logLevel + ", new = " + logLevel_,
-        "main",
-        "info"
-      );
-    }
-    if (logLevel_) {
-      // tell log.
-      logLevel = logLevel_;
-      setLogLevel(logLevel);
-    }
-  }
 
   /*
   function netRateDataFunc(jsonString) {
@@ -247,6 +228,23 @@ async function main() {
   //   });
 
   //??
+}
+
+function configWatchCallback() {
+  log("configWatchCallback", "main", "info");
+  const logLevel_ = configFile.get("logLevel");
+  if (logLevel_ !== logLevel) {
+    log(
+      "configWatchCallback: logLevel change: old = " + logLevel + ", new = " + logLevel_,
+      "main",
+      "info"
+    );
+  }
+  if (logLevel_) {
+    // tell log.
+    logLevel = logLevel_;
+    setLogLevel(logLevel);
+  }
 }
 
 main();
