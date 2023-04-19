@@ -87,6 +87,8 @@ async function main() {
   const clientName = configFile.get("clientName");
   log("..clientName=" + clientName, "main", "info");
 
+  const tcMode = configFile.get("tcMode");
+
   /*
   const clientToken = configFile.get("clientToken");
   log("..clientToken=" + clientToken, "main", "info");
@@ -116,6 +118,7 @@ async function main() {
     //_sendAlert: sendAlert,
     //_serialNumber: serialNumber,
     //_standAlone: true,
+    _tcMode: tcMode,
     _userDataPath: userDataPath,
   };
 
