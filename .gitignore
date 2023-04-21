@@ -2,5 +2,6 @@ build/
 coverage/
 node_modules/
 public/
-src
+src/
+src/startup/prerequisite.js
 *.tar

@@ -17,6 +17,18 @@ async function prerequisite(http, configFile) {
   let publicIPAddress = null;
   let serialNumber = null;
 
+  if (configFile.get("tcMode")) {
+    // do this early to make iipzy-pi happy.
+    const { stdout, stderr } = await spawnAsync("tc-config", [ "-r"]);
+    //if (stdout) {
+    //  log("TrafficControl.run: " + stdout, "tc  ", "error");
+    //}
+    if (stderr) {
+      log("(Error) prerequisite: enable tc" + stderr, "tc  ", "error");
+      //return;
+    }
+  }
+
   while (true) {
     gatewayIPAddress = await getGatewayIp();
     if (gatewayIPAddress !== "0.0.0.0") break;
