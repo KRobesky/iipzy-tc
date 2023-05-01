@@ -31,7 +31,7 @@ let trafficControl = null;
 function createServer() {
   log("main.createServer", "strt", "info");
   try {
-    server = app.listen(Defs.port_traffic_control, async () => {
+    server = app.listen(Defs.port_traffic_control, 'localhost', async () => {
       log(`Listening on port ${Defs.port_traffic_control}...`, "main", "info");
     });
   } catch (ex) {
