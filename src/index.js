@@ -13,33 +13,9 @@ const logPath = process.platform === "win32" ? "c:/temp/" : "/var/log/iipzy";
 logInit(logPath, "iipzy-tc");
 const { ConfigFile } = require("iipzy-shared/src/utils/configFile");
 const http = require("iipzy-shared/src/services/httpService");
-//const periodicHandler = require("iipzy-shared/src/utils/periodicHandler");
 const { processErrorHandler } = require("iipzy-shared/src/utils/utils");
 
-
-//const piLocalEvents = require("./core/main/utils/piLocalEvents");
-//const { IpcRecv } = require("./ipc/ipcRecv");
-//const IpcSend = require("./ipc/ipcSend");
-//const { setIpcRecv } = require("./ipc/eventWaiter");
-
-//const heartbeat = require("./core/main/heartbeat");
-//const pingPlot = require("./core/main/pingPlot");
-
-//const scheduler = require("./core/main/scheduler");
-//const throughputTest = require("./core/main/throughputTest");
-
 const TrafficControl = require("./services/trafficControl");
-
-//const { changeTimezoneIfNecessary } = require("./utils/timezone");
-
-//const actionHandler = require("./main/actionHandler");
-//const auth = require("./main/auth");
-//const remoteJobManager = require("./main/remoteJobManager");
-//const serverAddressMgr = require("./main/serverAddressMgr");
-
-//const { NetworkMonitor } = require("./services/networkMonitor");
-//let networkMonitor = null;
-//const { sendAlert } = require("./services/alertService");
 
 //require("./startup/routes")(app);
 const { prerequisite } = require("./startup/prerequisite");
@@ -48,12 +24,22 @@ let configFile = null;
 
 let logLevel = undefined;
 
-//let ipcRecv = null;
-//let ipcSend = null;
-
-//let server = null;
+let server = null;
 
 let trafficControl = null;
+
+function createServer() {
+  log("main.createServer", "strt", "info");
+  try {
+    server = app.listen(Defs.port_traffic_control, async () => {
+      log(`Listening on port ${Defs.port_traffic_control}...`, "main", "info");
+    });
+  } catch (ex) {
+    log("(Exception) main.createServer: " + ex, "strt", "error");
+    return false;
+  }
+  return true;
+}
 
 async function main() {
   const platformInfo_ = platformInfo.init();
@@ -62,18 +48,7 @@ async function main() {
   await configFile.init();
   configFile.watch(configWatchCallback);
 
-  const serverAddress = configFile.get("serverAddress");
-  if (serverAddress) {
-    log("serverAddress = " + serverAddress, "main", "info");
-    // set
-    try {
-      http.setBaseURL(serverAddress);
-    } catch (ex) {
-      log("(Exception) main - setBaseURL: " + ex, "main", "error");
-      http.clearBaseURL();
-      await configFile.set("serverAddress", "");
-    }
-  }
+  http.setBaseURL(configFile.get("serverAddress") + ":" + Defs.port_server);
 
   // NB: Won't leave here until successfully contacting server.
   const { gatewayIPAddress, localIPAddress, publicIPAddress, clientToken, authToken } = await prerequisite(
@@ -86,148 +61,28 @@ async function main() {
 
   const tcMode = configFile.get("tcMode");
 
-  /*
-  const clientToken = configFile.get("clientToken");
-  log("..clientToken=" + clientToken, "main", "info");
-  if (clientToken) {
-    http.setClientTokenHeader(clientToken);
-  }
-  */
-
   http.setClientTokenHeader(clientToken);
   http.setAuthTokenHeader(authToken);
 
-
-  //ipcRecv = new IpcRecv();
-  //ipcSend = new IpcSend();
-
   const context = {
-    //_clientName: clientName,
-    //_clientType: "appliance",
     _configFile: configFile,
     _gatewayIPAddress: gatewayIPAddress,
     _http: http,
-    //_ipcRecv: ipcRecv,
-    //_ipcSend: ipcSend,
     _localIPAddress: localIPAddress,
     _platformInfo: platformInfo_,
     _publicIPAddress: publicIPAddress,
-    //_sendAlert: sendAlert,
-    //_serialNumber: serialNumber,
-    //_standAlone: true,
     _tcMode: tcMode,
     _userDataPath: userDataPath,
   };
 
-  //setIpcRecv(ipcRecv);
-
-  //await serverAddressMgr.init(context);
-
-  /*
-  // attempt to login.
-  await auth.init(context);
-  await auth.login();
-  */
-
-
-  /*
-  function netRateDataFunc(jsonString) {
-    log("netRateDataFunc: date = " + jsonString, "main", "info");
-  }
-
-  function netRateDoneFunc(j) {
-    log("netRateDoneFunc", "main", "info");
-  }
-  */
-
-  /*
-  // dump device table
-  ipcRecv.registerReceiver(Defs.ipcDumpSentinelDeviceTable, (event, data) => {
-    log("dump device table", "main", "info");
-    networkMonitor.dumpDeviceTable();
-  });
-
-  ipcRecv.registerReceiver(Defs.ipcClientName, (event, data) => {
-    // clientName
-    log("ipcClientName: clientName = " + data.clientName, "main", "info");
-    const clientName = data.clientName + "(appliance)";
-    piLocalEvents.emit(Defs.ipcClientName, { clientName });
-  });
-
-  ipcRecv.registerReceiver(Defs.ipcServerAddress, async (event, data) => {
-    // serverAddress
-    log("ipcServerAddress: serverAddress = " + data.serverAddress, "main", "info");
-    await serverAddressMgr.saveServerAddress(data.serverAddress);
-    http.setBaseURL(data.serverAddress);
-
-    // check timezone.
-    if (await changeTimezoneIfNecessary(configFile)) {
-      // restart.
-      log("timezone change. Restarting in 5 seconds", "main", "info");
-      setTimeout(() => {
-        process.exit(99);
-      }, 5 * 1000);
-    }
-  });
-
-  ipcRecv.registerReceiver(Defs.ipcLoginStatus, (event, data) => {
-    // client logged in/out
-    log("ipcLoginStatus: loginStatus = " + data.loginStatus, "main", "info");
-    piLocalEvents.emit(Defs.ipcLoginStatus, data);
-  });
-
-  piLocalEvents.on(Defs.pevLoginNeeded, async (data) => {
-    log("pevLoginNeeded", "main", "info");
-    await auth.login();
-  });
-  */
-
-  //actionHandler.init(context);
-  //periodicHandler.init(context);
-  //await heartbeat.init(context, actionHandler.actionCB, periodicHandler.periodicCB);
-  //await pingPlot.init(context);
-  //await throughputTest.init(context);
-  //scheduler.init(context);
-  //remoteJobManager.init(context);
-
-  /*
-  networkMonitor = new NetworkMonitor(context);
-  // start in 10 seconds
-  setTimeout(async () => {
-    await networkMonitor.start("br-lan", "udp port 53");
-    //networkMonitor.start("eth0", "");
-  }, 10 * 1000);
-  */
+  // local server only.
+  createServer();
 
   trafficControl = new TrafficControl("testing", context);
   // start in 10 seconds
   setTimeout(async () => {
     trafficControl.run();
   }, 10 * 1000);
-
-  //??wifiService = new WifiService(context);
-
-  /*
-  log("__dirname: " + __dirname, "main", "info");
-  const port = 8002;
-  server = app.listen(port, async () => {
-    log(`Listening on port ${port}...`, "main", "info");
-  });
-  */
-
-  // server = https
-  //   .createServer(
-  //     {
-  //       key: fs.readFileSync(__dirname + "/certificate/server.key"),
-  //       cert: fs.readFileSync(__dirname + "/certificate/server.cert")
-  //     },
-  //     app
-  //   )
-  //   .listen(port, () => {
-  //     log(`Listening on port ${port}...`, "main", "info");
-  //   });
-
-  //??
 }
 
 function configWatchCallback() {
@@ -263,4 +118,4 @@ async function processAlertHandler(message) {
   // });
 }
 
-//module.exports = server;
+module.exports = server;
