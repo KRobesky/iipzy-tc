@@ -18,7 +18,7 @@ async function prerequisite(http, configFile) {
   let serialNumber = null;
 
   if (configFile.get("tcMode")) {
-    // do this early to make iipzy-pi happy.
+    // do this early to make iipzy-core happy.
     const { stdout, stderr } = await spawnAsync("tc-config", [ "-r"]);
     //if (stdout) {
     //  log("TrafficControl.run: " + stdout, "tc  ", "error");
